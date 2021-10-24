@@ -1,0 +1,61 @@
+[
+  {
+    "_id":"616907aae00c978118f0ca75",
+    "name": "John Smith",
+    "phone": 3605551430,
+    "price": 21.00,
+    "pizzaorder": 
+      {
+      "quantity":1,
+      "size": "large",
+      "toppings": "Cheese, Pepperoni",
+      "crust": "thick"
+    }
+  ,
+    "commitTime": "2021-09-29 04:44:21.328Z",
+    "status": "prelim"
+  },
+  { "_id":"616907aae00c978118f0ca77",
+    "name": "Slyvia Hampton",
+    "phone": 3606509494,
+    "price": 42.00,
+    "pizzaorder": {
+      "quantity": 2,
+      "size": "large",
+      "toppings": "Cheese, Tomatoes",
+      "crust": "thick"
+    },
+    "commitTime": "2021-09-29 04:45:21.328Z",
+    "status": "active"
+  },
+  {
+    "_id":"616907aae00c978118f0ca79",
+    "name": "Eleanor Rigsby",
+    "phone": 3607708934,
+    "price": 42.00,
+    "pizzaorder": {
+      "quantity": 2,
+      "size": "large",
+      "toppings": "Cheese, Vegetables",
+      "crust": "thick"
+    },
+    "commitTime": "2021-09-29 04:46:21.328Z",
+    "status": "in-oven"
+  },
+  {  
+    "_id":"616907aae00c978118f0ca7b",
+    "name": "Mickey Mango",
+    "phone": 3601234567,
+    "price": 21.00,
+    "pizzaorder": {
+      "quantity": 1,
+      "size": "large",
+      "toppings": "Cheese, Spiders",
+      "crust": "thick"
+    },
+    "commitTime": "2021-09-29 04:47:21.328Z",
+    "status": "complete"
+  }
+]
+
+ 

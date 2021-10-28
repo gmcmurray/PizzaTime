@@ -5,8 +5,8 @@ const kitchenSchema = new Schema(
   {
     date: {
       // day resolution not hour
-      type: Date,
-      default: Date.now,
+      type: String,
+      default: new Date().toLocaleDateString().slice(0,10),
       required: true
     },
     // queue ordernumber, timestamp entry, status

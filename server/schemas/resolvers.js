@@ -6,9 +6,8 @@ const stripe = require('stripe')('sk_test_4eC39HqLyjWDarjtT1zdp7dc');
 
 const resolvers = {
   Query: {
-    kitchentoday: async (parent, ) =>{
-      const nowkitchen = await Kitchen.findById(
-        "61738f38c83b2b79887c733c");
+    kitchentoday: async (parent,{today} ) =>{
+      const nowkitchen = await Kitchen.findOne({ date : today })
       return nowkitchen 
     },
 
@@ -105,13 +104,17 @@ const resolvers = {
     }
   },
   Mutation: {
+    // one kitchen per day, check to see if kitchen exists , if not create, else return existing kitchen
     addKitchen: async (parent,args) =>{
+      const nowkitchen = await Kitchen.findOne({ date : new Date().toLocaleDateString() })
+      if(nowkitchen === null){
       const newkitchendata = {
-        date: new Date().toLocaleDateString(),
+        date: new Date().toLocaleDateString().slice(0,10),
         queue: []
       }
       const newKitchen = await Kitchen.create(newkitchendata);
-       return newKitchen
+       return newKitchen}
+       else { return nowkitchen}
     },
 
     addUser: async (parent, args) => {
@@ -121,11 +124,10 @@ const resolvers = {
       return { token, user };
     },
 
-    updateKitchen: async (parent, {orderid, pizzas }, context) =>{
-      const nowkitchen = await Kitchen.findById(
-        "61738f38c83b2b79887c733c");
+    updateKitchen: async (parent, {orderid, pizzas, today }, context) =>{
+      const nowkitchen = await Kitchen.findOne({ date : today})
       let tqueue=nowkitchen.queue;
-      console.log("tqueue",tqueue)
+
       const capacity=20;
       const avgcooktime = 15; 
       
@@ -136,35 +138,38 @@ const resolvers = {
       // mark jobs complete that have passed theri commitTime -assume complete
       let count =0;
       let pizzacount =0;
+
+      console.log("nqueue",nqueue, "nnow",nnow)
+
       for (let x = 0; x < nqueue.length; x++) {
         if (parseInt(nqueue[x].commitTime) < nnow) {
+
           nqueue[x].status = 'complete'
         }
-        else if (count < capacity) {
+        else if (pizzacount < capacity) {
           nqueue[x].status = 'inoven'
-          pizzacount+=nqueue[x].pizzas[0].length
-          console.log(nqueue[x].pizzas[0].length)
-        }
-        else { nqueue.status = 'active'
-        pizzacount+=nqueue[x].pizzas[0].length
+          pizzacount+=(nqueue[x].pizzas[0].match(/,/g).length+1)
+             }
+        else { nqueue[x].status = 'active'
+        pizzacount+=(nqueue[x].pizzas[0].match(/,/g).length+1)
+ 
                 }
       }
-        let qtime; 
+        let qtime = 15; 
         console.log("pizzacount",pizzacount)
-        let inprog = nqueue.filter(({ status }) => status !== 'complete').reduce((total, obj) => obj.quantity + total, 0)
-        console.log(inprog)
+       
         if (pizzacount < capacity) {
             qtime = avgcooktime;
         }
         else {
             qtime = Math.ceil(avgcooktime * (pizzacount - capacity) / capacity) + 15;
         }
-        // console.log(`your pizza will ready in ${qtime} minutes`)
+        console.log(`your pizza will ready in ${qtime} minutes`)
         
         console.log('qtime', qtime)
       
       let newtime = Date.now() + qtime*60000;
-      let commtime = toString(newtime);
+      let commtime =newtime.toString();
       console.log("commtime",newtime)
 
       const newjob = {
@@ -174,13 +179,18 @@ const resolvers = {
         pizzas,
         commitTime: commtime
       };
+       nqueue.push(newjob);
  
-      const kitch = await Kitchen.findByIdAndUpdate(nowkitchen._id,
-        { $push: { queue: newjob }  },
-        { new: true }
+      const kitch = await Kitchen.replaceOne(
+        {_id: nowkitchen._id},
+        {
+          _id: nowkitchen._id,
+          date: new Date().toLocaleDateString(),
+          queue : nqueue
+        }
         );
 
-      //console.log('newkitch',kitch)
+      console.log('newkitch',kitch)
        return kitch
    
     },

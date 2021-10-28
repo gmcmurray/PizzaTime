@@ -91,10 +91,11 @@ const Cart = () => {
     const upkitch = await updateKitchen(
       { variables: {
         orderid: data.addOrder._id,
-        pizzas: stringpizzas }
+        pizzas: stringpizzas,
+        today: new Date().toLocaleDateString().slice(0,10)  }
        })
    
-       console.log(upkitch)
+       console.log("upkitch",upkitch)
 
   }
 

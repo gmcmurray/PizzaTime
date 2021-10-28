@@ -51,12 +51,12 @@ function Table ({columns, data}) {
 }
 
   function KitchenQ() {
-
-      let {loading, data:quedata} = useQuery(QUERY_KITCHENQUEUE);
+      let {loading, data:quedata} = useQuery(QUERY_KITCHENQUEUE, 
+        {variables: {today: new Date().toLocaleDateString().slice(0,10)}});
       const  bqueue = quedata?.kitchentoday.queue|| [];
       let ddata=[]
       if(bqueue){
-      console.log(quedata) 
+      console.log("quedata",quedata) 
       console.log(bqueue)
       
       for (let x = 0;x < bqueue.length; x++) {

@@ -66,7 +66,7 @@ const typeDefs = gql`
     order(_id: ID!): Order
     checkout(products: [ID]!): Checkout
     kitchens(_id: ID): Kitchen
-    kitchentoday: Kitchen
+    kitchentoday(today: String): Kitchen
   }
 
   type Mutation {
@@ -76,7 +76,7 @@ const typeDefs = gql`
     updateUser(firstName: String, lastName: String, email: String, password: String): User
     updateProduct(_id: ID!, quantity: Int!): Product
     login(email: String!, password: String!): Auth
-    updateKitchen(orderid: ID, pizzas: String): Kitchen
+    updateKitchen(orderid: ID, pizzas: String, today: String): Kitchen
   }
 `;
 

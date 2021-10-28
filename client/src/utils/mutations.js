@@ -12,8 +12,8 @@ export const LOGIN = gql`
 `;
 
 export const ADD_ORDER_KITCHEN = gql`
-  mutation updateKitchen($orderid: ID, $pizzas: String) {
-    updateKitchen(orderid: $orderid, pizzas: $pizzas) {
+  mutation updateKitchen($orderid: ID, $pizzas: String, $today: String) {
+    updateKitchen(orderid: $orderid, pizzas: $pizzas, today: $today) {
       _id
       date
       queue {

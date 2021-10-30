@@ -2,8 +2,9 @@
 import React, { useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { QUERY_CHECKOUT } from '../../utils/queries';
+import { QUERY_CHECKOUT, QUERY_PRODUCTS } from '../../utils/queries';
 import { idbPromise } from '../../utils/helpers';
+import { useQuery } from '@apollo/client';
 import CartItem from '../CartItem';
 import Auth from '../../utils/auth';
 import { useStoreContext } from '../../utils/GlobalState';
@@ -19,6 +20,8 @@ const Cart = () => {
   const [getCheckout, { data }] = useLazyQuery(QUERY_CHECKOUT);
   const [addOrder] = useMutation(ADD_ORDER);
   const [updateKitchen]= useMutation(ADD_ORDER_KITCHEN);
+  let {loading, data:prods} = useQuery(QUERY_PRODUCTS); 
+ console.log("products", prods)
 
   useEffect( () => {
     async function setOrder(){
@@ -29,14 +32,7 @@ const Cart = () => {
         productIds.push(item._id);
       }
     });
-    if (data) {
-      // const  newOrder = await addOrder({ variables: { products: productIds } });
-      // console.log('newOrder', newOrder)
-      // console.log('looking for id', newOrder.data,newOrder.data.addOrder._id)
-      // const upkitch = await updateKitchen({ variables: {
-      //     orderid: newOrder.data.addOrder._id }
-      //    })
-        
+    if (data) {      
      await stripePromise.then((res) => {
         res.redirectToCheckout({ sessionId: data.checkout.session });
       });
@@ -83,15 +79,20 @@ const Cart = () => {
     // add Order, prior to stripe event and connect
     // to Kitchen
     const  {data} = await addOrder({ variables: { products: productIds } });
-   
-    let pizzas = data.addOrder.products.map((e)=> e._id)
-    let stringpizzas = pizzas.toString()
-    console.log(data.addOrder._id)
+     
+    let pizzas = "";
+    for (let x=0; x < data.addOrder.products.length; x++) { 
+    if(data.addOrder.products[x]._id==="61738d66bad24764ccfd820e") pizzas+="Vegi,";
+    else if(data.addOrder.products[x].id ==="61738d66bad24764ccfd820f") pizzas+="Meatlovers,";
+    else{pizzas+="Combo,"}
+    }
+    
+    console.log("addorderpizzas",pizzas)
     
     const upkitch = await updateKitchen(
       { variables: {
         orderid: data.addOrder._id,
-        pizzas: stringpizzas,
+        pizzas,
         today: new Date().toLocaleDateString().slice(0,10)  }
        })
    

@@ -8,7 +8,7 @@ const jobSchema = new Schema(
             ref: 'Order'}, // linked to orders,linked referen
     priority: {type: String}, // ordercreatedAt time stamp in milliseconds
     status: {type:String},  // prelim, active, in-oven, cancel, complete
-    pizzas: [{type: String}],
+    pizzas: {type: String},
     commitTime: {type:String}
   }
 );

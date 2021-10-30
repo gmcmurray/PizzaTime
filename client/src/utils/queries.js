@@ -16,6 +16,22 @@ export const QUERY_PRODUCTS = gql`
   }
 `;
 
+export const QUERY_ALLPRODUCTS = gql`
+  query getAllProducts {
+    allproducts {
+      _id
+      name
+      description
+      price
+      quantity
+      image
+      category {
+        _id
+      }
+    }
+  }
+`;
+
 export const QUERY_KITCHENQUEUE = gql`
    query getKitchen($today: String){
     kitchentoday(today: $today ) {

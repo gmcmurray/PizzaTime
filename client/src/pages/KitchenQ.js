@@ -63,7 +63,7 @@ function Table ({columns, data}) {
                 ddata[x]={
                   priority: bqueue[x].priority,
                   orderId: bqueue[x].orderId,
-                  pizzas: bqueue[x].pizzas[0]}
+                  pizzas: bqueue[x].pizzas}
             }
           }
    
@@ -107,7 +107,7 @@ function Table ({columns, data}) {
             </h1>
 
             <h3>
-                Orders currently in the kitchen today {Moment().format('MMM d, YYYY')}<br /><br />
+                Orders currently in the kitchen today {new Date().toLocaleDateString().slice(0,10)}<br /><br />
             </h3>
           
             <Table columns={columns} data={data}/>

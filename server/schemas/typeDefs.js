@@ -20,7 +20,7 @@ const typeDefs = gql`
     orderId: ID
     status: String
     priority: String
-    pizzas: [String]
+    pizzas: String
     commitTime: String
   }
 
@@ -62,6 +62,7 @@ const typeDefs = gql`
     categories: [Category]
     products(category: ID, name: String): [Product]
     product(_id: ID!): Product
+    allproducts: [Product]
     user: User
     order(_id: ID!): Order
     checkout(products: [ID]!): Checkout

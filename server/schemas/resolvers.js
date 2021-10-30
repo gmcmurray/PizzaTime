@@ -34,6 +34,12 @@ const resolvers = {
 
       return await Product.find(params).populate('category');
     },
+
+    allproducts: async (parent, args) => {
+      return await Product.find({});
+    },
+
+
     product: async (parent, { _id }) => {
       return await Product.findById(_id).populate('category');
     },
@@ -140,21 +146,20 @@ const resolvers = {
       let pizzacount =0;
 
       console.log("nqueue",nqueue, "nnow",nnow)
-
+//Update status of queue items
       for (let x = 0; x < nqueue.length; x++) {
         if (parseInt(nqueue[x].commitTime) < nnow) {
-
           nqueue[x].status = 'complete'
         }
         else if (pizzacount < capacity) {
           nqueue[x].status = 'inoven'
-          pizzacount+=(nqueue[x].pizzas[0].match(/,/g).length+1)
+          pizzacount+=(nqueue[x].pizzas.match(/,/g).length)
              }
         else { nqueue[x].status = 'active'
-        pizzacount+=(nqueue[x].pizzas[0].match(/,/g).length+1)
- 
+        pizzacount+=(nqueue[x].pizzas.match(/,/g).length)
                 }
       }
+
         let qtime = 15; 
         console.log("pizzacount",pizzacount)
        
@@ -171,10 +176,11 @@ const resolvers = {
       let newtime = Date.now() + qtime*60000;
       let commtime =newtime.toString();
       console.log("commtime",newtime)
-
+      let newpriority = Date.now()/1000;
+      newpriority = parseInt(newpriority)
       const newjob = {
         orderId: orderid,
-        priority: Date.now().toString(),  // convert to string 
+        priority: newpriority.toString(),  // convert to string 
         status: "active",
         pizzas,
         commitTime: commtime
@@ -185,7 +191,7 @@ const resolvers = {
         {_id: nowkitchen._id},
         {
           _id: nowkitchen._id,
-          date: new Date().toLocaleDateString(),
+          date: new Date().toLocaleDateString().slice(0,10),
           queue : nqueue
         }
         );

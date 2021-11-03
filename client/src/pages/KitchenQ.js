@@ -4,7 +4,7 @@ import { useTable } from 'react-table';
 import { useQuery } from '@apollo/client';
 import { QUERY_KITCHENQUEUE } from '../utils/queries';
 import mockdata from '../utils/mockdata.json';
-import Moment from 'moment'
+import Clock from '../components/Clock';
 
 import  '../utils/table.css'
 import { useStoreContext } from '../utils/GlobalState';
@@ -51,6 +51,7 @@ function Table ({columns, data}) {
 }
 
   function KitchenQ() {
+      
       let {loading, data:quedata} = useQuery(QUERY_KITCHENQUEUE, 
         {variables: {today: new Date().toLocaleDateString().slice(0,10)}});
       const  bqueue = quedata?.kitchentoday.queue|| [];
@@ -63,7 +64,9 @@ function Table ({columns, data}) {
                 ddata[x]={
                   priority: bqueue[x].priority,
                   orderId: bqueue[x].orderId,
-                  pizzas: bqueue[x].pizzas}
+                  orderName: bqueue[x].orderName,
+                  pizzas: bqueue[x].pizzas,
+                  commitTime: bqueue[x].commitTime}
             }
           }
    
@@ -82,6 +85,10 @@ function Table ({columns, data}) {
             accessor: 'orderId'
         },
         {
+          Header: 'Order Name',
+          accessor: 'orderName'
+      },
+        {
             Header: 'Item Ordered',
             accessor: 'pizzas'
         },
@@ -89,6 +96,11 @@ function Table ({columns, data}) {
         {
             Header: 'Priority',
             accessor: 'priority'
+        },
+        
+        {
+            Header: 'Commit Time',
+            accessor: 'commitTime'
         }
 
     ])
@@ -101,13 +113,13 @@ function Table ({columns, data}) {
         <div className="container my-1">
         <Link to="/"> ← Back to Pizza Menus</Link>
         <br />
-        
+            
             <h1>
-                Kitchen Queue <br /><br />
+                Kitchen Queue    <br /><br />
             </h1>
 
             <h3>
-                Orders currently in the kitchen today {new Date().toLocaleDateString().slice(0,10)}<br /><br />
+                Orders currently in the kitchen today {new Date().toLocaleDateString().slice(0,10)} <Clock /><br /><br />
             </h3>
           
             <Table columns={columns} data={data}/>

@@ -1,0 +1,68 @@
+
+import {React, useState} from "react";
+import { Link } from 'react-router-dom';
+import { useTable } from 'react-table';
+import { useQuery } from '@apollo/client';
+import { QUERY_KITCHENQUEUE } from '../utils/queries';
+import mockdata1 from '../utils/mockdata1.json';
+import  '../utils/kitchenops.css'
+
+function KitchenOps(){
+const [contacts, setContacts] = useState(mockdata1)
+
+
+    // let { loading, data: quedata } = useQuery(QUERY_KITCHENQUEUE,
+    //     { variables: { today: new Date().toLocaleDateString().slice(0, 10) } });
+    // const bqueue = quedata?.kitchentoday.queue || [];
+    // let ddata = []
+    // if (bqueue) {
+    //     console.log("quedata", quedata)
+    //     console.log(bqueue)
+
+    //     for (let x = 0; x < bqueue.length; x++) {
+    //         ddata[x] = {
+    //             priority: bqueue[x].priority,
+    //             orderId: bqueue[x].orderId,
+    //             orderName: bqueue[x].orderName,
+    //             pizzas: bqueue[x].pizzas
+    //         }
+    //     }
+    // }
+    // else {
+    //     ddata = mockdata1;
+    // }
+
+    return(
+        <>
+            <div className="app-container">
+            <Link to="/"> ← Back to Pizza Menus</Link>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Priority</th>
+                            <th>Order </th>
+                            <th>Items Ordered</th>
+                            <th>Due Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+  
+                        { 
+                        
+                       contacts.map((c) => (
+                              <tr>
+                                <td>c.priority </td>
+                                <td>c.orderName  </td>
+                                <td>c.pizzas  </td>
+                                <td> c.dueTime </td>
+                                <td> c.status </td>
+                            </tr>))}  
+                    </tbody>
+                </table>
+            </div>
+        </>
+    )
+};
+
+export default KitchenOps;

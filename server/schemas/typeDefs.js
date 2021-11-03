@@ -18,6 +18,7 @@ const typeDefs = gql`
 
   type Job {
     orderId: ID
+    orderName: String
     status: String
     priority: String
     pizzas: String
@@ -77,7 +78,7 @@ const typeDefs = gql`
     updateUser(firstName: String, lastName: String, email: String, password: String): User
     updateProduct(_id: ID!, quantity: Int!): Product
     login(email: String!, password: String!): Auth
-    updateKitchen(orderid: ID, pizzas: String, today: String): Kitchen
+    updateKitchen(orderid: ID,orderName: String,  pizzas: String, today: String): Kitchen
   }
 `;
 

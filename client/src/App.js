@@ -7,7 +7,6 @@ import {
   createHttpLink,
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
-
 import Home from './pages/Home';
 import Detail from './pages/Detail';
 import NoMatch from './pages/NoMatch';
@@ -18,6 +17,7 @@ import { StoreProvider } from './utils/GlobalState';
 import Success from './pages/Success';
 import UserHistory from './pages/UserHistory';
 import KitchenQ from './pages/KitchenQ';
+import KitchenOps from './pages/KitchenOps';
 
 const httpLink = createHttpLink({
   uri: '/graphql',
@@ -54,6 +54,7 @@ function App() {
               <Route exact path="/userHistory" component={UserHistory} />
               <Route exact path="/products/:id" component={Detail} />
               <Route exact path="/kitchenQ" component={KitchenQ}/>
+              {/* <Route exact path="/kitchenOps" component={KitchenOps}/> */}
               <Route component={NoMatch} />
             </Switch>
           </StoreProvider>

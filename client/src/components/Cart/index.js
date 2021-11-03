@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { QUERY_CHECKOUT, QUERY_PRODUCTS } from '../../utils/queries';
+import { QUERY_CHECKOUT, QUERY_PRODUCTS,QUERY_USER } from '../../utils/queries';
 import { idbPromise } from '../../utils/helpers';
 import { useQuery } from '@apollo/client';
 import CartItem from '../CartItem';
@@ -21,8 +21,9 @@ const Cart = () => {
   const [addOrder] = useMutation(ADD_ORDER);
   const [updateKitchen]= useMutation(ADD_ORDER_KITCHEN);
   let {loading, data:prods} = useQuery(QUERY_PRODUCTS); 
- console.log("products", prods)
-
+ 
+ let {  data:username} = useQuery(QUERY_USER);
+//  console.log("users", username.user);
   useEffect( () => {
     async function setOrder(){
     const productIds = [];
@@ -78,8 +79,11 @@ const Cart = () => {
 
     // add Order, prior to stripe event and connect
     // to Kitchen
-    const  {data} = await addOrder({ variables: { products: productIds } });
-     
+    console.log('hello')
+
+    const  {data} = await addOrder(
+      { variables: { products: productIds } });
+    
     let pizzas = "";
     for (let x=0; x < data.addOrder.products.length; x++) { 
     if(data.addOrder.products[x]._id==="61738d66bad24764ccfd820e") pizzas+="Vegi,";
@@ -87,13 +91,21 @@ const Cart = () => {
     else{pizzas+="Combo,"}
     }
     
+    // let ordername =
     console.log("addorderpizzas",pizzas)
+    let ndate = new Date().toLocaleDateString().slice(0,10)
+    let rndnb = Math.floor(Math.random() * 100) + 1
+    rndnb = rndnb.toString();
+    let ordrName =username.user.firstName.substring(0,2)+username.user.lastName.substring(0,3)+ndate+"-"+rndnb;
     
+    console.log("ordrName", ordrName, "ndate", ndate)
+
     const upkitch = await updateKitchen(
       { variables: {
         orderid: data.addOrder._id,
+        orderName: ordrName,
         pizzas,
-        today: new Date().toLocaleDateString().slice(0,10)  }
+        today: ndate  }
        })
    
        console.log("upkitch",upkitch)

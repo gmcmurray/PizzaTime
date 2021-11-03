@@ -130,10 +130,10 @@ const resolvers = {
       return { token, user };
     },
 
-    updateKitchen: async (parent, {orderid, pizzas, today }, context) =>{
+    updateKitchen: async (parent, {orderid, orderName, pizzas, today }, context) =>{
       const nowkitchen = await Kitchen.findOne({ date : today})
       let tqueue=nowkitchen.queue;
-
+      console.log('resolver tqueue', tqueue)
       const capacity=20;
       const avgcooktime = 15; 
       
@@ -143,23 +143,26 @@ const resolvers = {
       nqueue.sort((a,b) => (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0));
       // mark jobs complete that have passed theri commitTime -assume complete
       let count =0;
-      let pizzacount =0;
+      let pizzacount = 0;
 
       console.log("nqueue",nqueue, "nnow",nnow)
 //Update status of queue items
+      let prty=0;
       for (let x = 0; x < nqueue.length; x++) {
         if (parseInt(nqueue[x].commitTime) < nnow) {
-          nqueue[x].status = 'complete'
+          nqueue[x].status = 'complete';
+          nqueue[x].priority = 999
         }
         else if (pizzacount < capacity) {
+          nqueue[x].priority=++prty;
           nqueue[x].status = 'inoven'
           pizzacount+=(nqueue[x].pizzas.match(/,/g).length)
              }
         else { nqueue[x].status = 'active'
-        pizzacount+=(nqueue[x].pizzas.match(/,/g).length)
+        pizzacount+=(nqueue[x].pizzas.match(/,/g).length);
+        nqueue[x].priority=++prty;
                 }
       }
-
         let qtime = 15; 
         console.log("pizzacount",pizzacount)
        
@@ -173,18 +176,22 @@ const resolvers = {
         
         console.log('qtime', qtime)
       
-      let newtime = Date.now() + qtime*60000;
-      let commtime =newtime.toString();
-      console.log("commtime",newtime)
-      let newpriority = Date.now()/1000;
-      newpriority = parseInt(newpriority)
+      let newtime = new Date(Date.now() + qtime*60000);
+       
+
+      let commtime =newtime.getHours().toString()+':'+ newtime.getMinutes().toString();
+      console.log("commtime",commtime)
+      let newpriority = prty+1;
+
       const newjob = {
         orderId: orderid,
+        orderName: orderName,
         priority: newpriority.toString(),  // convert to string 
         status: "active",
         pizzas,
         commitTime: commtime
       };
+
        nqueue.push(newjob);
  
       const kitch = await Kitchen.replaceOne(
@@ -206,9 +213,10 @@ const resolvers = {
       console.log('order has been added')
       if (context.user) {
         const order = new Order({ products });
-        console.log("add order",order)
-        const upUser = await User.findByIdAndUpdate(context.user._id, { $push: { orders: order } });
-       
+         
+        const upUser = await User.findByIdAndUpdate(
+          context.user._id, { $push: { orders: order } });
+        console.log("add order",upUser)
         return order;
       }
 

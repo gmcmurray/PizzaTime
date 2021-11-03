@@ -2,7 +2,7 @@ import React from "react";
 import ProductList from "../components/ProductList";
 import CategoryMenu from "../components/CategoryMenu";
 import Cart from "../components/Cart";
-import KitchenQ from "./KitchenQ";
+import KitchenOps from "./KitchenOps";
 
 
 
@@ -13,6 +13,7 @@ const Home = () => {
       <CategoryMenu />
       <ProductList />
       <Cart />
+       
  
     </div>
   );

@@ -39,6 +39,7 @@ export const QUERY_KITCHENQUEUE = gql`
       date
       queue {
         orderId
+        orderName
         priority
         commitTime
         pizzas

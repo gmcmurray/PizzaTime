@@ -6,6 +6,7 @@ const jobSchema = new Schema(
 {
     orderId: {type: Schema.Types.ObjectId,
             ref: 'Order'}, // linked to orders,linked referen
+    orderName: {type: String},  // firstInitial, lastName, Date, RandomNumber 0-999
     priority: {type: String}, // ordercreatedAt time stamp in milliseconds
     status: {type:String},  // prelim, active, in-oven, cancel, complete
     pizzas: {type: String},

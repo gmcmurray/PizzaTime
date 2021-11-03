@@ -10,15 +10,21 @@ let obj2 = { x:23,
 // var count = (temp.match(/is/g) || []).length;
 // console.log(count);
 let temp = '61738d66bad24764ccfd820e,61738d66bad2,4764ccfd8210'
-console.log((temp.match(/,/g)).length )       
-console.log(obj2)
-console.log("new", new Date().toLocaleDateString().slice(0,10))
-// ==="2021-10-28" )
-console.log("now", Date.now())
+// console.log((temp.match(/,/g)).length )       
+// console.log(obj2)
 
+let newtime = new Date(Date.now() + 15*60000);
+
+console.log("nnnnew", new Date().getMinutes(), newtime.getMinutes() )
+// ==="2021-10-28" )
+console.log("now", new Date().getMinutes())
+console.log('temp[0]', temp.substring(0,3))
 let qtime=15;
-let newtime = Date.now() + qtime*60000;
-let commtime = newtime.toString();
+
+
+
+let commtime = Math.floor(newtime/(1000*60*60)) + ":" + Math.floor(newtime/(1000*60))%60 + ":" + Math.floor(newtime/1000)%60;
+
 console.log("commtime",commtime, newtime)
 
  const jobs = [    {

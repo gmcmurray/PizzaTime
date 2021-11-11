@@ -1,10 +1,13 @@
 import React, {useState} from  'react';
 import { TOGGLE_CART } from '../../utils/actions';
 import './dropDown.css'
-function Dropdown({ title, items, multiSelect = false}){
+import onClickOutside from 'react-onclickoutside';
+
+ function Dropdown({ title, items, multiSelect = false}){
     const [open, setOpen] = useState(false);
     const [selection, setSelection] = useState([]);
     const toggle = () => setOpen(!open)
+    Dropdown.handleClickOutside = () => setOpen(false);
 
     function handleOnClick(item){
         if(!selection.some(current => current.id===item.id)){
@@ -53,7 +56,7 @@ function Dropdown({ title, items, multiSelect = false}){
                         <button type="button" onClick={()=>handleOnClick(item)}>
                             <span>{item.value}</span>
                             <span>Qty:</span>
-                            <input type='number' default='0'></input>
+                            <input type='number' name='pizzaqty' default='0'></input>
                             <span>{isItemInSelection(item) && 'Selected'}</span>
                         </button>
                     </li>                 
@@ -65,9 +68,11 @@ function Dropdown({ title, items, multiSelect = false}){
 
         )}
     </div>
-
-
     )
 }
 
-export default Dropdown
+const clickOutsideConfig = {
+    handleClickOutside: () => Dropdown.handleClickOutside,
+};
+
+export default onClickOutside(Dropdown,clickOutsideConfig)

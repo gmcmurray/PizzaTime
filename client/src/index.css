@@ -28,26 +28,6 @@ body {
   color: var(--dark);
 }
 
-.btnOrder{
-  background-color: green;
-  color:white;
-  max-width: 16%;
-  display: block;
-}
-.btnSch {
-  background-color: yellow;
-  color:black;
-  max-width: 8%;
-  font-weight: 900;
-  display: block;
-}
-.btnCancel {
-  background-color: Red;
-  color:black;
-  max-width: 16%;
-  font-weight: 900;
-  display: block;
-}
  
 
 

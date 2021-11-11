@@ -9,7 +9,32 @@ import {ADD_ORDER } from '../utils/mutations';
 import { ADD_ORDER_KITCHEN } from '../utils/mutations';
 import  '../utils/table.css'
 import { useStoreContext } from '../utils/GlobalState';
-import Dropdown from '../components/DropDown';
+import Dropddown from '../components/DropDown';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import Dropdown from 'react-bootstrap/Dropdown';
+
+const styles = {
+  btnOrder: {
+    background: 'green',
+    color: 'white',
+    width: '100%',
+    display: 'block'
+  },
+  btnSch: {
+    background: 'yellow',
+    color: 'black',
+    width: '15%',
+    display: 'block'
+  },
+  btnCancel: {
+    background: 'red',
+    color: 'black',
+    width: '100%',
+    display: 'block'
+  }
+ 
+};
 
 function Table ({columns, data}) {
   const {
@@ -52,10 +77,18 @@ function Table ({columns, data}) {
 }
 
   function KitchenQ() {
+    
+    // State Variable to collect form information
       const [addFormData, setAddFormData] = useState({
         orderName: "",
-        pizzas:""
+        phoneNumber:"",
+        timeWanted:"",
+        MeatLovers:0,
+        Vegetarian:0,
+        Combo:0
+
       })
+      // State Variable to Hide Schedule Button
       const [show, setShow] = React.useState(true)
       
 
@@ -76,7 +109,6 @@ function Table ({columns, data}) {
       async function schedulePizza(event){
         event.preventDefault();
         setShow(false)
-        // Reveal Add/Cancel Buttons
         // Go and schedule pizza 
         // Return commit time and either add order or cancel
         console.log("Schedule that pizza!")
@@ -108,6 +140,8 @@ function Table ({columns, data}) {
         console.log("Cancel that pizza!")
       }
 
+ // Get data from database to populate pizza order queue
+
       let {loading, data:quedata} = useQuery(QUERY_KITCHENQUEUE, 
         {variables: {today: new Date().toLocaleDateString().slice(0,10)}});
       const  bqueue = quedata?.kitchentoday.queue|| [];
@@ -128,7 +162,13 @@ function Table ({columns, data}) {
         else{
          ddata = mockdata;
         }
-    //Define columns
+
+    // set data to populate table
+
+    const data = React.useMemo(() => ddata)
+
+    //Define columns for table
+
     const columns = React.useMemo(() => [
         {
             Header: 'Pizza #',
@@ -157,54 +197,86 @@ function Table ({columns, data}) {
           Header: 'Action '
         }
     ])
-    const items =[{id:"61738d66bad24764ccfd820f",
-                  value:"MeatLovers"},
-                  {id:"61738d66bad24764ccfd820e",
-                    value:"Vegi"},
-                    {id:"61738d66bad24764ccfd8210",
-                      value:"Combo"}]
-                      
-    const data = React.useMemo(() => ddata)
 
-    return(
-        <>
+    // create items to populate dropdown pizza selection menu with hardcoded id for ordering purposes and text value
+
+    const items = [{
+      id: "61738d66bad24764ccfd820f",
+      value: "MeatLovers"
+    },
+    {
+      id: "61738d66bad24764ccfd820e",
+      value: "Vegi"
+    },
+    {
+      id: "61738d66bad24764ccfd8210",
+      value: "Combo"
+    }]
+                      
+    return (
+      <>
         <div className="container my-1">
-        <Link to="/"> ← Back to Pizza Menus</Link>
-        <br />
-            
-            <h1>
-                Kitchen Queue    <br /><br />
-            </h1>
-            
-            <h3>
-                Orders currently in the kitchen today {new Date().toLocaleDateString().slice(0,10)} <Clock /><br /><br />
-            </h3>
-            <h4> Phone Order: </h4> 
-            <div style={{margin: '4px',justifyContent: 'space-evenly', display: 'flex', border: ' 2px solid red'}}>
-            <form > 
-              <input type="text" name="orderName" required="required" 
-              placeholder="OrderName ..." onChange={handleAddFormChange} />
-              <input type="text" name="phoneNumber" required="required" 
-              placeholder="PhoneNumber ..." onChange={handleAddFormChange} />
-              <input type="text" name="TimeWanted" required="required" 
-              placeholder="Time Wanted ..." onChange={handleAddFormChange} />
-              <input type="text" name="TimeCommit" required="required" 
-              placeholder="Time Commit ..." onChange={handleAddFormChange} />
+          <Link to="/"> ← Back to Pizza Menus</Link>
+          <br />
+
+          <h1>
+            Kitchen Queue    <br /><br />
+          </h1>
+          <h3>
+            Orders currently in the kitchen today {new Date().toLocaleDateString().slice(0, 10)} <Clock /><br /><br />
+          </h3>
+          <h4> Phone Order: </h4>
+          <div style={{ margin: '4px', justifyContent: 'space-evenly', display: 'flex', border: ' 2px solid red' }}>
+            <form style={{ margin: '4px', justifyContent: 'space-evenly', display: 'flex-wrap' }}  >
+              <input type="text" name="orderName" required="required"
+                placeholder="OrderName ..." onChange={handleAddFormChange} />
+
+              <input type="text" name="phoneNumber" required="required"
+                placeholder="PhoneNumber ..." onChange={handleAddFormChange} />
+
+              <input type="text" name="TimeWanted" required="required"
+                placeholder="Time Wanted ..." onChange={handleAddFormChange} />
+
+                <input type="text" name="MeatLovers" required="required"
+                placeholder="MeatLovers ..." onChange={handleAddFormChange} />
+
+                <input type="text" name="Vegetarian" required="required"
+                placeholder="Vegetarian ..." onChange={handleAddFormChange} />
+
+                <input type="text" name="Combo" required="required"
+                placeholder="Combo ..." onChange={handleAddFormChange} />
+           
+              {/* <Dropddown title="Select Pizzas" items={items}  /> */}
+              {show ?
+                <button className="btnSch" type="submit" style={styles.btnSch} onClick={schedulePizza} > <span>Sched</span> </button>
+                : <div >
+                  <button className="btnOrder" type="submit" style={styles.btnOrder} onClick={orderPizza}> <span className="btnText">Add</span> </button>
+                  <button className="btnCancel" type="submit" style={styles.btnCancel} onClick={cancelPizza}> <span className="btnText">Cancel</span> </button>
+                </div>}
             </form>
-            <Dropdown title="Select Pizzas" items={items}/>
-             { show ?
-              <button className="btnSch" type="submit" onClick={schedulePizza} > <span>Sched</span> </button> 
-              : <div>
-              <button className="btnOrder" type="submit" onClick={orderPizza}> <span className="btnText">Add</span> </button>
-              <button className="btnCancel" type="submit" onClick={cancelPizza}> <span className="btnText">Cancel</span> </button>
-             
-             </div>}
-              </div>
-            
-            <Table columns={columns} data={data} multiSelect/>
-            
+          </div>
+
+          {/* <div className="App container">
+      
+            <DropdownButton
+              alignRight
+              title="Dropdown right"
+              id="dropdown-menu-align-right"
+              onSelect={handleSelect}
+            >
+              <Dropdown.Item eventKey="Vegitarian">Vegitarian</Dropdown.Item>
+              <Dropdown.Item eventKey="MeatLovers">MeatLovers</Dropdown.Item>
+              <Dropdown.Item eventKey="Combo">Combo</Dropdown.Item>
+              <Dropdown.Divider />
+              <Dropdown.Item eventKey="some link">some link</Dropdown.Item>
+            </DropdownButton>
+            <h4>You selected {value}</h4>
+          </div> */}
+
+          <Table columns={columns} data={data} multiSelect />
+
         </div>
-        </>
+      </>
     )
 }
 

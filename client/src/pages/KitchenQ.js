@@ -1,7 +1,7 @@
 import React, { useEffect,useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTable } from 'react-table';
-import { useQuery } from '@apollo/client';
+import { useQuery,useMutation } from '@apollo/client';
 import { QUERY_KITCHENQUEUE } from '../utils/queries';
 import mockdata from '../utils/mockdata.json';
 import Clock from '../components/Clock';
@@ -13,6 +13,7 @@ import Dropddown from '../components/DropDown';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
+const { DateTime } = require("luxon");
 
 const styles = {
   btnOrder: {
@@ -32,6 +33,11 @@ const styles = {
     color: 'black',
     width: '100%',
     display: 'block'
+  },
+  kitchenhead: {
+    display: 'flex',
+    justifyContent: 'space-between'
+
   }
  
 };
@@ -77,7 +83,11 @@ function Table ({columns, data}) {
 }
 
   function KitchenQ() {
-    
+
+
+    const [addOrder] = useMutation(ADD_ORDER);
+    const [updateKitchen]= useMutation(ADD_ORDER_KITCHEN);
+
     // State Variable to collect form information
       const [addFormData, setAddFormData] = useState({
         orderName: "",
@@ -111,13 +121,19 @@ function Table ({columns, data}) {
         setShow(false)
         // Go and schedule pizza 
         // Return commit time and either add order or cancel
-        console.log("Schedule that pizza!")
+
+        let neworder = { ...addFormData};
+
+        console.log("Schedule that pizza!", neworder)
       }
 
       async function orderPizza(event){
         event.preventDefault();
+        // const  {data} = await addOrder(
+        //   { variables: { products: productIds } });
        
-        setTimeout(function() {
+       
+          setTimeout(function() {
           setShow(true)
         }, 1500);
         
@@ -212,19 +228,21 @@ function Table ({columns, data}) {
       id: "61738d66bad24764ccfd8210",
       value: "Combo"
     }]
-                      
+    var options = { hour12: false };
+    var date = new Date();        
     return (
       <>
         <div className="container my-1">
           <Link to="/"> ← Back to Pizza Menus</Link>
           <br />
-
-          <h1>
-            Kitchen Queue    <br /><br />
-          </h1>
+         <div style={styles.kitchenhead}>
           <h3>
-            Orders currently in the kitchen today {new Date().toLocaleDateString().slice(0, 10)} <Clock /><br /><br />
+            Kitchen Queue    
           </h3>
+          {/* {nnnow} */}
+          {new Date().toLocaleString('en-US' )}
+          <Clock />
+          </div>
           <h4> Phone Order: </h4>
           <div style={{ margin: '4px', justifyContent: 'space-evenly', display: 'flex', border: ' 2px solid red' }}>
             <form style={{ margin: '4px', justifyContent: 'space-evenly', display: 'flex-wrap' }}  >

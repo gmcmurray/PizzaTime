@@ -1,8 +1,72 @@
+// const { statuschangeJobs, calculatequeuetime} = require('./helpers.js').default;
 const { AuthenticationError } = require('apollo-server-express');
 const { User, Product, Category, Order, Kitchen } = require('../models');
 const { signToken } = require('../utils/auth');
  
 const stripe = require('stripe')('sk_test_4eC39HqLyjWDarjtT1zdp7dc');
+
+function calculatequeuetime(pizzas, requestTime, capacity, avgcooktime, pizzacount, nnow) {
+  let qtime = avgcooktime;
+  if (requestTime - nnow > (1 + pizzacount / capacity) * avgcooktime) {
+    return [qtime, requestTime]
+  }
+  // Calculate queue time
+  else {
+    if (pizzacount < capacity) {
+      qtime = avgcooktime;
+    }
+    else {
+      qtime = Math.ceil(avgcooktime * (pizzacount - capacity) / capacity) + 15;
+    }
+    console.log(`your pizza will ready in ${qtime} minutes`)
+    console.log('qtime', qtime)
+    // Calculate commitTime
+    let newtime = new Date(nnow + qtime * 60000);
+
+    let commtime = newtime.getHours().toString() + ':' + newtime.getMinutes().toString();
+    console.log("commtime", commtime)
+
+    return [qtime, commtime]
+  }
+}
+// statuschangeJobs updates the job status in queue and returns active count of pizzas
+// if auto parameter is true then updates based on commitTime else uses
+// manual kitchen status and returns pizzacount.
+function statuschangeJobs(queue, capacity, nnow, auto=0) {
+  let nqueue = [...queue]
+  nqueue.sort((a, b) => (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0));
+  let pizzacount = 0;  //active orders (not completed) of pizzas
+  console.log("nqueue", nqueue, "nnow", nnow, "auto",auto);
+  //Update each job status of queue prior to entering order by commitTime
+  let prty = 0;
+  if (auto) {
+    for (let x = 0; x < nqueue.length; x++) {
+      if (parseInt(nqueue[x].commitTime) < nnow) {
+        nqueue[x].status = 'complete';
+        nqueue[x].priority = 999;
+      }
+      else if (pizzacount < capacity) {
+        nqueue[x].priority = ++prty;
+        nqueue[x].status = 'inoven';
+        pizzacount += nqueue[x].pizzas.match(/,/g).length;
+      }
+      else {
+        nqueue[x].status = 'active';
+        pizzacount += nqueue[x].pizzas.match(/,/g).length;
+        nqueue[x].priority = ++prty;
+      }
+    }
+  }
+  else { // Use existing queue status from kitchen
+    for (let x = 0; x < nqueue.length; x++) { 
+    if (nqueue[x].status = 'active' || 'inoven') { pizzacount += 1 }
+  }
+}
+  nqueue.sort((a, b) => (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0));
+  return [nqueue, pizzacount]
+}
+ 
+
 
 const resolvers = {
   Query: {
@@ -21,11 +85,9 @@ const resolvers = {
     },
     products: async (parent, { category, name }) => {
       const params = {};
-
       if (category) {
         params.category = category;
       }
-
       if (name) {
         params.name = {
           $regex: name
@@ -76,9 +138,6 @@ const resolvers = {
       
       const { products } = await order.populate('products').execPopulate();
       
-      // console.log("order", order)
-      // console.log("products", products)
-
       for (let i = 0; i < products.length; i++) {
         const product = await stripe.products.create({
           name: products[i].name,
@@ -130,58 +189,68 @@ const resolvers = {
       return { token, user };
     },
 
-    updateKitchen: async (parent, {orderid, orderName, pizzas, today }, context) =>{
+    updateKitchen: async (parent, {orderid, orderName, pizzas, today, requestTime }, context) =>{
+      // Get latest kitchen state
+      
       const nowkitchen = await Kitchen.findOne({ date : today})
       let tqueue=nowkitchen.queue;
       console.log('resolver tqueue', tqueue)
-      const capacity=20;
-      const avgcooktime = 15; 
-      
-      let nqueue = [...tqueue]
+
+      const capacity=20;  // Oven capacity for pizzas
+      const avgcooktime = 15; // average pizza cooktime
       let nnow = Date.now()
-      // sort queue
-      nqueue.sort((a,b) => (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0));
-      // mark jobs complete that have passed theri commitTime -assume complete
-      let count =0;
-      let pizzacount = 0;
+      let auto=0;
+      let [nqueue,pizzacount] = statuschangeJobs(tqueue,capacity,nnow,auto);
+      console.log("yess",nqueue, pizzacount)
+//       let nqueue = [...tqueue]
+//       let nnow = Date.now()
+//       // sort queue
+//       nqueue.sort((a,b) => (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0));
+//       // mark jobs complete that have passed theri commitTime -assume complete
+//       let count =0;
+//       let pizzacount = 0;
 
-      console.log("nqueue",nqueue, "nnow",nnow)
-//Update status of queue items
-      let prty=0;
-      for (let x = 0; x < nqueue.length; x++) {
-        if (parseInt(nqueue[x].commitTime) < nnow) {
-          nqueue[x].status = 'complete';
-          nqueue[x].priority = 999
-        }
-        else if (pizzacount < capacity) {
-          nqueue[x].priority=++prty;
-          nqueue[x].status = 'inoven'
-          pizzacount+=(nqueue[x].pizzas.match(/,/g).length)
-             }
-        else { nqueue[x].status = 'active'
-        pizzacount+=(nqueue[x].pizzas.match(/,/g).length);
-        nqueue[x].priority=++prty;
-                }
-      }
-        let qtime = 15; 
-        console.log("pizzacount",pizzacount)
+//       console.log("nqueue",nqueue, "nnow",nnow)
+// //Update status of queue items prior to entering order
+//       let prty=0;
+//       for (let x = 0; x < nqueue.length; x++) {
+//         if (parseInt(nqueue[x].commitTime) < nnow) {
+//           nqueue[x].status = 'complete';
+//           nqueue[x].priority = 999
+//         }
+//         else if (pizzacount < capacity) {
+//           nqueue[x].priority=++prty;
+//           nqueue[x].status = 'inoven'
+//           pizzacount+=(nqueue[x].pizzas.match(/,/g).length)
+//              }
+//         else { nqueue[x].status = 'active'
+//         pizzacount+=(nqueue[x].pizzas.match(/,/g).length);
+//         nqueue[x].priority=++prty;
+//                 }
+//       }
+
+ 
+   const [qtime,commtime]=calculatequeuetime(pizzas, requestTime, capacity, avgcooktime,pizzacount,nnow)
+   console.log("qtime", qtime)
+      //   let qtime = 15; 
+      //   console.log("pizzacount",pizzacount)
        
-        if (pizzacount < capacity) {
-            qtime = avgcooktime;
-        }
-        else {
-            qtime = Math.ceil(avgcooktime * (pizzacount - capacity) / capacity) + 15;
-        }
-        console.log(`your pizza will ready in ${qtime} minutes`)
-        
-        console.log('qtime', qtime)
+      //   if (pizzacount < capacity) {
+      //       qtime = avgcooktime;
+      //   }
+      //   else {
+      //       qtime = Math.ceil(avgcooktime * (pizzacount - capacity) / capacity) + 15;
+      //   }
+      //   console.log(`your pizza will ready in ${qtime} minutes`)
+      //   console.log('qtime', qtime)
       
-      let newtime = new Date(Date.now() + qtime*60000);
+      // let newtime = new Date(Date.now() + qtime*60000);
        
 
-      let commtime =newtime.getHours().toString()+':'+ newtime.getMinutes().toString();
-      console.log("commtime",commtime)
-      let newpriority = prty+1;
+      // let commtime =newtime.getHours().toString()+':'+ newtime.getMinutes().toString();
+      // console.log("commtime",commtime)
+
+      let newpriority = pizzacount+1;
 
       const newjob = {
         orderId: orderid,
@@ -191,9 +260,10 @@ const resolvers = {
         pizzas,
         commitTime: commtime
       };
+      nqueue.push(newjob);
 
-       nqueue.push(newjob);
- 
+      // Replace kitchen queue with new order added
+
       const kitch = await Kitchen.replaceOne(
         {_id: nowkitchen._id},
         {
@@ -219,9 +289,22 @@ const resolvers = {
         console.log("add order",upUser)
         return order;
       }
-
       throw new AuthenticationError('Not logged in');
     },
+
+    // addOrderFromKitchen: async (parent, { products }, context) => {
+    //   //Ordering from Kitchen
+    //   console.log('order has been added')
+    //   if (context.user._id="618d97086b360a1a34c2480f") {
+    //     const order = new Order({ products })
+    //     const upUser = await User.findByIdAndUpdate(
+    //       "618d97086b360a1a34c2480f", { $push: { orders: order } });
+    //     console.log("add order",upUser)
+    //     return order;
+    //   }
+
+    //   throw new AuthenticationError('Not logged in');
+    // },
 
     updateUser: async (parent, args, context) => {
       if (context.user) {

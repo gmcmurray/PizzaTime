@@ -13,9 +13,9 @@ let temp = '61738d66bad24764ccfd820e,61738d66bad2,4764ccfd8210'
 // console.log((temp.match(/,/g)).length )       
 // console.log(obj2)
 
-let newtime = new Date(Date.now() + 15*60000);
+let newtime = new Date();
 
-console.log("nnnnew", new Date().getMinutes(), newtime.getMinutes() )
+console.log("nnnnew", newtime.getMonth(), newtime.getDay(), newtime.getFullYear() )
 // ==="2021-10-28" )
 console.log("now", new Date().getMinutes())
 console.log('temp[0]', temp.substring(0,3))
@@ -107,4 +107,78 @@ console.log("commtime",commtime, newtime)
         
                        }       
     }
-    console.log(pizzacount)
+    // console.log(pizzacount)
+
+    let neworder = {
+      "MeatLovers": "2",
+      "Combo":"1"
+    }
+
+    let pizaorder =[];
+       
+    const menuitems = {
+      "MeatLovers": "61738d66bad24764ccfd820f",
+      "Vegetarian": "61738d66bad24764ccfd820e",
+      "Combo": "61738d66bad24764ccfd8210"
+    };
+    let pmenu = Object.keys(menuitems);
+    for(const item of pmenu){
+      if(neworder[item]){
+        for(let y=0;y<parseInt(neworder[item]);y++){
+          pizaorder.push(menuitems[item])
+        }
+      }
+    }
+
+    console.log(pizaorder)
+
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    
+    today = mm + '/' + dd + '/' + yyyy;
+
+    console.log("today",today)
+
+let time1 = "21:15";
+let time2 = "22:11";
+let time3 = "21:45";
+let ftime = today +" " + time1 + ":00" ;
+let d = new Date(ftime)
+
+console.log(d.getTime())
+console.log(Date.now())
+console.log(time1<time2)
+console.log(time3<time1);
+
+
+
+
+const list1 = {
+  head: {
+    value: 6,
+    next: {
+      value: 0,
+      next: {
+        value: 8,
+        next: null
+      }
+    }
+  }
+};
+
+const list2 = {
+  head: {
+    value: 6,
+    next: {
+      value: 1,
+      next: {
+        value: 2,
+        next: null
+      }
+    }
+  }
+};
+
+console.log((list2.head.value + list1.head.value)%10)

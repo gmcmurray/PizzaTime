@@ -49,6 +49,10 @@ const typeDefs = gql`
     session: ID
   }
 
+  type CommitTime {
+    commiTime:[String] 
+  }
+
   type Auth {
     token: ID
     user: User
@@ -69,6 +73,7 @@ const typeDefs = gql`
     checkout(products: [ID]!): Checkout
     kitchens(_id: ID): Kitchen
     kitchentoday(today: String): Kitchen
+    getQT(order:[String],today: String): CommitTime
   }
 
   type Mutation {

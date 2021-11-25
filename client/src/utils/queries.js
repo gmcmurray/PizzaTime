@@ -43,7 +43,16 @@ export const QUERY_KITCHENQUEUE = gql`
         priority
         commitTime
         pizzas
+        status
       }
+    }
+  }
+`;
+
+export const QUERY_GET_COMMTIME = gql`
+   query getQTime($order:[String], $today: String){
+    getQT(order: $order,today: $today ) {
+     commiTime
     }
   }
 `;

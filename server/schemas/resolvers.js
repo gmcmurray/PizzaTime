@@ -2,10 +2,24 @@
 const { AuthenticationError } = require('apollo-server-express');
 const { User, Product, Category, Order, Kitchen } = require('../models');
 const { signToken } = require('../utils/auth');
- 
+const capacity=20;  // Oven capacity for pizzas
+const avgcooktime = 15; // average pizza cooktime
 const stripe = require('stripe')('sk_test_4eC39HqLyjWDarjtT1zdp7dc');
 
-function calculatequeuetime(pizzas, requestTime, capacity, avgcooktime, pizzacount, nnow) {
+function calculatequeuetime(pizzas, requestTime, capacity, avgcooktime, pizzacount) {
+  let nnow = Date.now();
+  //requestTime is string of format 19:23 
+  let today = new Date();
+  let dd = String(today.getDate()).padStart(2, '0');
+  let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+  let yyyy = today.getFullYear();
+    
+  today = mm + '/' + dd + '/' + yyyy;
+  let ftime = today +" " + requestTime + ":00" ;
+  let d = new Date(ftime)
+  requestTime = d.getTime()  //Now in milliseconds since 1970
+  pizzacount=pizzacount+pizzas.length
+  // let requestTime= nnow;
   let qtime = avgcooktime;
   if (requestTime - nnow > (1 + pizzacount / capacity) * avgcooktime) {
     return [qtime, requestTime]
@@ -59,15 +73,13 @@ function statuschangeJobs(queue, capacity, nnow, auto=0) {
   }
   else { // Use existing queue status from kitchen
     for (let x = 0; x < nqueue.length; x++) { 
-    if (nqueue[x].status = 'active' || 'inoven') { pizzacount += 1 }
+    if (nqueue[x].status = 'active' || 'inoven') { pizzacount++}
   }
 }
   nqueue.sort((a, b) => (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0));
   return [nqueue, pizzacount]
 }
  
-
-
 const resolvers = {
   Query: {
     kitchentoday: async (parent,{today} ) =>{
@@ -78,6 +90,21 @@ const resolvers = {
     kitchens: async (parent, {_id}) =>{
       const kitch = await Kitchen.findById(_id);
       return kitch 
+    },
+    getQT: async (parent, {order,today}) =>{
+      // order = ["pizzas","requestTime"]
+      const nowkitchen = await Kitchen.findOne({ date : today})
+      let tqueue=nowkitchen.queue;
+      let nnow = Date.now()
+      let auto=0;
+      const [nqueue,pizzacount] = statuschangeJobs(tqueue,capacity,nnow,auto);
+      console.log("yess",nqueue, pizzacount)
+      let pizzas=order[0];
+      let requestTime=order[1];
+      const [qtime,commtime]=calculatequeuetime(pizzas, requestTime, capacity, avgcooktime,pizzacount)
+      console.log("qtime", qtime, "commTime",commtime)
+      let commiTime = [qtime,commtime]
+      return commiTime
     },
 
     categories: async () => {
@@ -196,60 +223,14 @@ const resolvers = {
       let tqueue=nowkitchen.queue;
       console.log('resolver tqueue', tqueue)
 
-      const capacity=20;  // Oven capacity for pizzas
-      const avgcooktime = 15; // average pizza cooktime
+     
       let nnow = Date.now()
       let auto=0;
-      let [nqueue,pizzacount] = statuschangeJobs(tqueue,capacity,nnow,auto);
+      const [nqueue,pizzacount] = statuschangeJobs(tqueue,capacity,nnow,auto);
       console.log("yess",nqueue, pizzacount)
-//       let nqueue = [...tqueue]
-//       let nnow = Date.now()
-//       // sort queue
-//       nqueue.sort((a,b) => (a.priority > b.priority) ? 1 : ((b.priority > a.priority) ? -1 : 0));
-//       // mark jobs complete that have passed theri commitTime -assume complete
-//       let count =0;
-//       let pizzacount = 0;
-
-//       console.log("nqueue",nqueue, "nnow",nnow)
-// //Update status of queue items prior to entering order
-//       let prty=0;
-//       for (let x = 0; x < nqueue.length; x++) {
-//         if (parseInt(nqueue[x].commitTime) < nnow) {
-//           nqueue[x].status = 'complete';
-//           nqueue[x].priority = 999
-//         }
-//         else if (pizzacount < capacity) {
-//           nqueue[x].priority=++prty;
-//           nqueue[x].status = 'inoven'
-//           pizzacount+=(nqueue[x].pizzas.match(/,/g).length)
-//              }
-//         else { nqueue[x].status = 'active'
-//         pizzacount+=(nqueue[x].pizzas.match(/,/g).length);
-//         nqueue[x].priority=++prty;
-//                 }
-//       }
-
- 
-   const [qtime,commtime]=calculatequeuetime(pizzas, requestTime, capacity, avgcooktime,pizzacount,nnow)
-   console.log("qtime", qtime)
-      //   let qtime = 15; 
-      //   console.log("pizzacount",pizzacount)
-       
-      //   if (pizzacount < capacity) {
-      //       qtime = avgcooktime;
-      //   }
-      //   else {
-      //       qtime = Math.ceil(avgcooktime * (pizzacount - capacity) / capacity) + 15;
-      //   }
-      //   console.log(`your pizza will ready in ${qtime} minutes`)
-      //   console.log('qtime', qtime)
-      
-      // let newtime = new Date(Date.now() + qtime*60000);
-       
-
-      // let commtime =newtime.getHours().toString()+':'+ newtime.getMinutes().toString();
-      // console.log("commtime",commtime)
-
+      const [qtime,commtime]=calculatequeuetime(pizzas, requestTime, capacity, avgcooktime,pizzacount)
+      console.log("qtime", qtime)
+  
       let newpriority = pizzacount+1;
 
       const newjob = {
@@ -280,13 +261,13 @@ const resolvers = {
 
     addOrder: async (parent, { products }, context) => {
       //console.log(context);
-      console.log('order has been added')
+      
       if (context.user) {
         const order = new Order({ products });
-         
+        console.log('order has been added',order)
         const upUser = await User.findByIdAndUpdate(
           context.user._id, { $push: { orders: order } });
-        console.log("add order",upUser)
+        // console.log("add order",upUser)
         return order;
       }
       throw new AuthenticationError('Not logged in');

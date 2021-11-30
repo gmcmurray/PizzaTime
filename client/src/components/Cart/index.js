@@ -90,7 +90,7 @@ const Cart = () => {
     else if(data.addOrder.products[x].id ==="61738d66bad24764ccfd820f") pizzas+="Meatlovers,";
     else{pizzas+="Combo,"}
     }
-    
+    console.log("total cost", calculateTotal())
     // let ordername =
     console.log("addorderpizzas",pizzas)
     let ndate = new Date().toLocaleDateString().slice(0,10)
@@ -105,7 +105,8 @@ const Cart = () => {
         orderid: data.addOrder._id,
         orderName: ordrName,
         pizzas,
-        today: ndate  }
+        today: ndate,
+        sales: calculateTotal()  }
        })
    
        console.log("upkitch",upkitch)

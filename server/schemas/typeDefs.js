@@ -22,6 +22,7 @@ const typeDefs = gql`
     status: String
     priority: String
     pizzas: String
+    sales: String
     commitTime: String
   }
 
@@ -83,7 +84,7 @@ const typeDefs = gql`
     updateUser(firstName: String, lastName: String, email: String, password: String): User
     updateProduct(_id: ID!, quantity: Int!): Product
     login(email: String!, password: String!): Auth
-    updateKitchen(orderid: ID,orderName: String,  pizzas: String, today: String, requestTime: String): Kitchen
+    updateKitchen(orderid: ID,orderName: String,  pizzas: String, today: String, requestTime: String, sales: String): Kitchen
     # addOrderFromKitchen(products: [ID]!): Order
     # updateOrderDirectKitchen(orderid: ID,orderName: String,  pizzas: String, today: String): Kitchen
   }

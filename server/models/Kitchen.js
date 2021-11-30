@@ -11,6 +11,7 @@ const kitchenSchema = new Schema(
     },
     // queue ordernumber, timestamp entry, status
     queue: [jobSchema],
+
   }
 );
 

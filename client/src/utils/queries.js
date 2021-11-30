@@ -43,6 +43,7 @@ export const QUERY_KITCHENQUEUE = gql`
         priority
         commitTime
         pizzas
+        sales
         status
       }
     }

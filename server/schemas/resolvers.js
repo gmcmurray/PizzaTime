@@ -37,7 +37,12 @@ function calculatequeuetime(pizzas, requestTime, capacity, avgcooktime, pizzacou
     // Calculate commitTime
     let newtime = new Date(nnow + qtime * 60000);
 
-    let commtime = newtime.getHours().toString() + ':' + newtime.getMinutes().toString();
+    let mins = newtime.getMinutes()<10 ? "0"+ newtime.getMinutes().toString() : newtime.getMinutes().toString();
+    let hrs = newtime.getHours()<10 ? "0"+ newtime.getHours().toString() : newtime.getHours().toString();
+    let commtime = hrs + ':' + mins;
+
+    // let commtime = newtime.getHours().toString() + ':' + newtime.getMinutes().toString();
+    
     console.log("commtime", commtime)
 
     return [qtime, commtime]
@@ -216,7 +221,7 @@ const resolvers = {
       return { token, user };
     },
 
-    updateKitchen: async (parent, {orderid, orderName, pizzas, today, requestTime }, context) =>{
+    updateKitchen: async (parent, {orderid, orderName, pizzas, today, requestTime, sales }, context) =>{
       // Get latest kitchen state
       
       const nowkitchen = await Kitchen.findOne({ date : today})
@@ -239,10 +244,12 @@ const resolvers = {
         priority: newpriority.toString(),  // convert to string 
         status: "active",
         pizzas,
-        commitTime: commtime
+        commitTime: commtime,
+        sales
       };
       nqueue.push(newjob);
 
+      console.log('newjob newjob', newjob)
       // Replace kitchen queue with new order added
 
       const kitch = await Kitchen.replaceOne(

@@ -8,7 +8,7 @@ import {
     Tooltip,
     Legend,
   } from 'chart.js';
-  import { Bar } from 'react-chartjs-2';
+  import { Bar,Pie } from 'react-chartjs-2';
   import faker from 'faker';
   
   ChartJS.register(
@@ -24,7 +24,7 @@ import {
     plugins: {
       title: {
         display: true,
-        text: 'Chart.js Bar Chart - Stacked',
+        text: 'Kitchen Queue',
       },
     },
     responsive: true,
@@ -37,25 +37,25 @@ import {
       },
     },
   };
-  const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+  const labels = ['5pm', '6pm', '7pm', '8pm', '9pm', '10pm', '11pm'];
   
   export const data = {
     labels,
     datasets: [
       {
-        label: 'Dataset 1',
-        data: labels.map(() => 100),
-        backgroundColor: 'rgb(255, 99, 132)',
+        label: 'Active Orders',
+        data: labels.map(() => faker.datatype.number({ min: 10, max: 30 })),
+        backgroundColor: 'green',
       },
       {
-        label: 'Dataset 2',
-        data: labels.map(() => faker.datatype.number({ min: -100, max: 100 })),
-        backgroundColor: 'rgb(75, 192, 192)',
+        label: 'InOven',
+        data: labels.map(() => faker.datatype.number({ min: 0, max: 20 })),
+        backgroundColor: 'orange',
       },
       {
-        label: 'Dataset 3',
-        data: labels.map(() => faker.datatype.number({ min: -100, max: 100 })),
-        backgroundColor: 'rgb(53, 162, 235)',
+        label: 'Completed',
+        data: labels.map(() => faker.datatype.number({ min: -10, max: 0 })),
+        backgroundColor: 'cyan',
       },
     ],
   };

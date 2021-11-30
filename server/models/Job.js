@@ -10,7 +10,8 @@ const jobSchema = new Schema(
     priority: {type: String}, // ordercreatedAt time stamp in milliseconds
     status: {type:String},  // prelim, active, in-oven, cancel, complete
     pizzas: {type: String},
-    commitTime: {type:String}
+    commitTime: {type:String},
+    sales: {type:String}
   }
 );
 

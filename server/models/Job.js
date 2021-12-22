@@ -11,6 +11,7 @@ const jobSchema = new Schema(
     status: {type:String},  // prelim, active, in-oven, cancel, complete
     pizzas: {type: String},
     commitTime: {type:String},
+    completed: {type:String},
     sales: {type:String}
   }
 );

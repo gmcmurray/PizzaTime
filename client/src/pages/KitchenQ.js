@@ -222,7 +222,7 @@ function KitchenQ() {
 
   const columns = React.useMemo(() => [
     {
-      Header: 'C Time',
+      Header: 'Sch Time',
       accessor: 'commitTime'
     },
     {
@@ -245,9 +245,14 @@ function KitchenQ() {
 
   const columnsc = React.useMemo(() => [
     {
-      Header: 'C Time',
+      Header: 'Completed',
+      accessor: 'finished'
+    },
+    {
+      Header: 'Sch Time',
       accessor: 'commitTime'
     },
+   
     {
       Header: 'Order Name',
       accessor: 'orderName'
@@ -255,11 +260,7 @@ function KitchenQ() {
     {
       Header: 'Items Ordered',
       accessor: 'pizzas'
-    },
-    // {
-    //   Header: 'Sales',
-    //   accessor: 'sales'
-    // },
+    }
     
   ])
 

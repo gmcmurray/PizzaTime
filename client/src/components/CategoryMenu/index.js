@@ -8,6 +8,17 @@ import {
 import { QUERY_CATEGORIES } from '../../utils/queries';
 import { idbPromise } from '../../utils/helpers';
 
+const theme = {
+  blue: {
+    default: "#3f51b5",
+    hover: "#283593"
+  },
+  pink: {
+    default: "#e91e63",
+    hover: "#ad1457"
+  }
+};
+
 function CategoryMenu() {
   const [state, dispatch] = useStoreContext();
 
@@ -41,8 +52,14 @@ function CategoryMenu() {
     });
   };
 
+  async function  updateToday(){
+    let today = new Date().toLocaleDateString().slice(0,10)
+    alert(`Reset for today ${today}`)  }
+
   return (
     <div>
+      <button variant = "danger" onClick= {updateToday} >Set Kitchen Date Today</button>
+  
       <h2>Menu:</h2>
       {categories.map((item) => (
         <button
@@ -53,6 +70,7 @@ function CategoryMenu() {
         >
           {item.name}
         </button>
+        
       ))}
     </div>
   );
